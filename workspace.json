@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "app": "apps/app",
+    "cli": "apps/cli",
     "foo": "libs/foo"
   }
 }
