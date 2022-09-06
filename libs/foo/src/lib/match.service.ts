@@ -1,15 +1,11 @@
 import { Fighter } from './fighter.model';
-
-type IntervalTimer = ReturnType<typeof setInterval>;
+import { IntervalTimer } from './interval-timer.type';
 
 export class Match {
-  isInProgress = false;
-  winner?: Fighter;
-
   private fighter1: Fighter;
   private fighter2: Fighter;
-
-  private matchLoopIds?: IntervalTimer[];
+  private matchTimerId?: IntervalTimer;
+  private winner?: Fighter;
 
   constructor(fighter1: Fighter, fighter2: Fighter) {
     this.fighter1 = fighter1;
@@ -17,15 +13,21 @@ export class Match {
   }
 
   start() {
-    this.isInProgress = true;
+    this.matchTimerId = setInterval(() => {
+      if (this.checkWinner()) {
+        this.stop();
+      }
+    }, 1);
 
-    this.matchLoopIds = this.startMatchLoop();
+    this.fighter1.startFighting(this.fighter2);
+    this.fighter2.startFighting(this.fighter1);
   }
 
   stop() {
-    this.isInProgress = false;
+    this.fighter1.stopFighting();
+    this.fighter2.stopFighting();
 
-    this.matchLoopIds?.forEach((id) => clearInterval(id));
+    clearInterval(this.matchTimerId);
   }
 
   getStatus() {
@@ -36,50 +38,26 @@ export class Match {
     };
   }
 
-  private startMatchLoop(): IntervalTimer[] {
-    return [
-      setInterval(() => {
-        this.fighter1 = this.registerHit(this.fighter1, this.fighter2);
-
-        if (this.checkWinner()) {
-          this.stop();
-        }
-      }, this.fighter2.hitFrequencyMs),
-      setInterval(() => {
-        this.fighter2 = this.registerHit(this.fighter2, this.fighter1);
-
-        if (this.checkWinner()) {
-          this.stop();
-        }
-      }, this.fighter1.hitFrequencyMs),
-    ];
-  }
-
-  private registerHit(fighter: Fighter, gotHitFrom: Fighter): Fighter {
-    const healthPointsAfterHit = fighter.healthPoints - gotHitFrom.hitStrength;
-    const healthPoints = healthPointsAfterHit < 0 ? 0 : healthPointsAfterHit;
-
-    return {
-      ...fighter,
-      healthPoints,
-    };
-  }
-
   private checkWinner(): boolean {
-    const fighters = [this.fighter1, this.fighter2];
+    const fighters = [{ ...this.fighter1 }, { ...this.fighter2 }];
+    // console.log(fighters);
 
-    if (fighters.findIndex(({ healthPoints }) => healthPoints === 0) === -1) {
+    if (fighters.findIndex(({ isIncapacitated }) => isIncapacitated) === -1) {
+      console.log('nah 1');
       return false;
     }
 
     const possibleWinner = fighters.filter(
-      ({ healthPoints }) => healthPoints > 0
+      ({ isIncapacitated }) => !isIncapacitated
     );
 
     if (possibleWinner.length > 1) {
+      console.log('nah 2');
       return false;
     } else {
-      this.winner = possibleWinner[0];
+      this.winner = possibleWinner[0] as Fighter;
+
+      console.log('yessah', this.winner, possibleWinner[0]);
 
       return true;
     }
