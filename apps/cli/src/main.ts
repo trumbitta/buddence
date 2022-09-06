@@ -2,14 +2,16 @@ import { Fighter, Match } from '@buddence/foo';
 
 const trinita: Fighter = {
   name: 'Trinita',
-  healthPoints: 70,
+  healthPoints: 20,
   hitStrength: 5,
+  hitFrequencyMs: 2000,
 };
 
 const bambino: Fighter = {
   name: 'Bambino',
   healthPoints: 30,
-  hitStrength: 10,
+  hitStrength: 8,
+  hitFrequencyMs: 4000,
 };
 
 const match = new Match(trinita, bambino);
@@ -18,6 +20,7 @@ match.start();
 const intervalId = setInterval(() => {
   const { fighter1, fighter2, winner } = match.getStatus();
 
+  console.clear();
   console.log(`${fighter1.name}: ${fighter1.healthPoints}`);
   console.log(`${fighter2.name}: ${fighter2.healthPoints}`);
 
@@ -27,4 +30,4 @@ const intervalId = setInterval(() => {
     console.log(`✨ ${winner.name} WINS! ✨`);
     console.log(`ℹ️  ${winner.healthPoints} remaining health points.`);
   }
-}, 500);
+}, 20);

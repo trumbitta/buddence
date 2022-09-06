@@ -1,5 +1,7 @@
 import { Fighter } from './fighter.model';
 
+type IntervalTimer = ReturnType<typeof setInterval>;
+
 export class Match {
   isInProgress = false;
   winner?: Fighter;
@@ -7,7 +9,7 @@ export class Match {
   private fighter1: Fighter;
   private fighter2: Fighter;
 
-  private matchLoopId?: ReturnType<typeof setInterval>;
+  private matchLoopIds?: IntervalTimer[];
 
   constructor(fighter1: Fighter, fighter2: Fighter) {
     this.fighter1 = fighter1;
@@ -17,13 +19,13 @@ export class Match {
   start() {
     this.isInProgress = true;
 
-    this.matchLoopId = this.startMatchLoop();
+    this.matchLoopIds = this.startMatchLoop();
   }
 
   stop() {
     this.isInProgress = false;
 
-    clearInterval(this.matchLoopId);
+    this.matchLoopIds?.forEach((id) => clearInterval(id));
   }
 
   getStatus() {
@@ -34,15 +36,23 @@ export class Match {
     };
   }
 
-  private startMatchLoop(): ReturnType<typeof setInterval> {
-    return setInterval(() => {
-      this.fighter1 = this.registerHit(this.fighter1, this.fighter2);
-      this.fighter2 = this.registerHit(this.fighter2, this.fighter1);
+  private startMatchLoop(): IntervalTimer[] {
+    return [
+      setInterval(() => {
+        this.fighter1 = this.registerHit(this.fighter1, this.fighter2);
 
-      if (this.checkWinner()) {
-        this.stop();
-      }
-    }, 1000);
+        if (this.checkWinner()) {
+          this.stop();
+        }
+      }, this.fighter2.hitFrequencyMs),
+      setInterval(() => {
+        this.fighter2 = this.registerHit(this.fighter2, this.fighter1);
+
+        if (this.checkWinner()) {
+          this.stop();
+        }
+      }, this.fighter1.hitFrequencyMs),
+    ];
   }
 
   private registerHit(fighter: Fighter, gotHitFrom: Fighter): Fighter {
