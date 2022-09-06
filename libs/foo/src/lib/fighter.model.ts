@@ -41,7 +41,6 @@ export class Fighter {
 
   stopFighting() {
     if (this.fightingLoopTimerId) {
-      console.log(this.name, 'stopping', this.isIncapacitated);
       clearInterval(this.fightingLoopTimerId);
       this.fightingLoopTimerId = undefined;
     }

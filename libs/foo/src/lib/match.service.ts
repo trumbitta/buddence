@@ -1,15 +1,15 @@
-import { Fighter } from './fighter.model';
+import { Fighter, FighterData } from './fighter.model';
 import { IntervalTimer } from './interval-timer.type';
 
 export class Match {
-  private fighter1: Fighter;
-  private fighter2: Fighter;
   private matchTimerId?: IntervalTimer;
+  private team1: Fighter[];
+  private team2: Fighter[];
   private winner?: Fighter;
 
-  constructor(fighter1: Fighter, fighter2: Fighter) {
-    this.fighter1 = fighter1;
-    this.fighter2 = fighter2;
+  constructor(team1: FighterData[], team2: FighterData[]) {
+    this.team1 = team1.map((fighterData) => new Fighter(fighterData));
+    this.team2 = team2.map((fighterData) => new Fighter(fighterData));
   }
 
   start() {
@@ -17,47 +17,57 @@ export class Match {
       if (this.checkWinner()) {
         this.stop();
       }
-    }, 1);
+    }, 2000);
 
-    this.fighter1.startFighting(this.fighter2);
-    this.fighter2.startFighting(this.fighter1);
+    this.startFighting();
   }
 
   stop() {
-    this.fighter1.stopFighting();
-    this.fighter2.stopFighting();
+    this.stopFighting();
 
     clearInterval(this.matchTimerId);
   }
 
   getStatus() {
     return {
-      fighter1: this.fighter1,
-      fighter2: this.fighter2,
+      team1: this.team1,
+      team2: this.team2,
       winner: this.winner,
     };
   }
 
-  private checkWinner(): boolean {
-    const fighters = [{ ...this.fighter1 }, { ...this.fighter2 }];
-    // console.log(fighters);
+  private stopFighting() {
+    this.team1.forEach((fighter) => fighter.stopFighting());
+    this.team2.forEach((fighter) => fighter.stopFighting());
+  }
 
-    if (fighters.findIndex(({ isIncapacitated }) => isIncapacitated) === -1) {
-      console.log('nah 1');
+  private startFighting() {
+    this.team1.forEach((fighter, index) => {
+      fighter.startFighting(this.team2[index]);
+    });
+
+    this.team2.forEach((fighter, index) => {
+      fighter.startFighting(this.team1[index]);
+    });
+  }
+
+  private checkWinner(): boolean {
+    if (
+      [...this.team1, ...this.team2].findIndex(
+        ({ isIncapacitated }) => isIncapacitated
+      ) === -1
+    ) {
       return false;
     }
 
-    const possibleWinner = fighters.filter(
+    const possibleWinner = [...this.team1, ...this.team2].filter(
       ({ isIncapacitated }) => !isIncapacitated
     );
 
     if (possibleWinner.length > 1) {
-      console.log('nah 2');
       return false;
     } else {
       this.winner = possibleWinner[0] as Fighter;
-
-      console.log('yessah', this.winner, possibleWinner[0]);
 
       return true;
     }
