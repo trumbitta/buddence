@@ -1,11 +1,20 @@
-# foo
+# TODO
 
-This library was generated with [Nx](https://nx.dev).
+## Shift aggro
 
-## Running unit tests
+- [ ] Once a fighter is incapacitated, aggro shifts
+- [ ] Extract aggro shifting function
+- [ ] Make aggro shifting optional
+- [ ] Use aggro shifting function as default but make it pluggable
 
-Run `nx test foo` to execute the unit tests via [Jest](https://jestjs.io).
+## Pre-declare opponents
 
-## Running lint
+_(makes fights vs special bosses possible)_
 
-Run `nx lint foo` to execute the lint via [ESLint](https://eslint.org/).
+- [ ] Give each fighter in a team its own opponent before starting the match
+
+## Future
+
+- [ ] Moves / rotation of
+- [ ] Special moves / cosmo charge
+- [ ] Leveling system (a plugin outside of the core Match service?)

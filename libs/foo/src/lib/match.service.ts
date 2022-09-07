@@ -5,7 +5,7 @@ export class Match {
   private matchTimerId?: IntervalTimer;
   private team1: Fighter[];
   private team2: Fighter[];
-  private winner?: Fighter;
+  private winner?: Fighter[];
 
   constructor(team1: FighterData[], team2: FighterData[]) {
     this.team1 = team1.map((fighterData) => new Fighter(fighterData));
@@ -52,6 +52,7 @@ export class Match {
   }
 
   private checkWinner(): boolean {
+    // Well, no one is incapacitated yet.
     if (
       [...this.team1, ...this.team2].findIndex(
         ({ isIncapacitated }) => isIncapacitated
@@ -60,16 +61,22 @@ export class Match {
       return false;
     }
 
-    const possibleWinner = [...this.team1, ...this.team2].filter(
-      ({ isIncapacitated }) => !isIncapacitated
-    );
-
-    if (possibleWinner.length > 1) {
-      return false;
-    } else {
-      this.winner = possibleWinner[0] as Fighter;
+    if (
+      this.team1.filter(({ isIncapacitated }) => !isIncapacitated).length === 0
+    ) {
+      this.winner = this.team2;
 
       return true;
     }
+
+    if (
+      this.team2.filter(({ isIncapacitated }) => !isIncapacitated).length === 0
+    ) {
+      this.winner = this.team1;
+
+      return true;
+    }
+
+    return false;
   }
 }
